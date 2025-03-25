@@ -23,6 +23,12 @@ def get_mac_address(ifname):
     info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', bytes(ifname[:15], 'utf-8')))
     return ''.join(['%02x:' % b for b in info[18:24]])[:-1]
 
+def get_dns_entries():
+    dns_output = os.popen('cat /etc/resolv.conf | grep nameserver | cut -d " " -f2').read().strip()
+    dns_servers = [server for server in dns_output.split('\n') if server]
+    dns_string = ', '.join(dns_servers)
+    return dns_string
+
 def main():
     hostname = socket.gethostname()
     ip_address = socket.gethostbyname(hostname)
@@ -35,7 +41,8 @@ def main():
 #    draw.rectangle((0, 0, 176, 264), fill=255)
     draw.text((10, 10), 'IP eth0: ' + get_ip_address('eth0'), font=font, fill=0)
     draw.text((10, 30), 'IP wlan0: ' + get_ip_address('wlan0'), font=font, fill=0)
-    draw.text((10, 50), 'DNS: ' + os.popen('cat /etc/resolv.conf | grep nameserver | cut -d " " -f2').read(), font=font, fill=0)
+    # draw.text((10, 50), 'DNS: ' + os.popen('cat /etc/resolv.conf | grep nameserver | cut -d " " -f2').read(), font=font, fill=0)
+    draw.text((10, 50), 'DNS: ' + get_dns_entries(), font=font, fill=0)
     draw.text((10, 70), 'Gateway: ' + os.popen('ip route | grep default | cut -d " " -f3').read(), font=font, fill=0)
     draw.text((10, 90), 'Hostname: ' + os.popen('hostname').read(), font=font, fill=0)
     draw.text((10, 110), 'MAC eth0: ' + get_mac_address('eth0'), font=font, fill=0)
